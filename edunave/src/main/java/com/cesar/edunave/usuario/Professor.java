@@ -6,8 +6,13 @@ import com.cesar.edunave.eletiva.Eletiva;
 import com.cesar.edunave.enums.TipoAcesso;
 
 public class Professor extends Usuario {
-    public Professor(String nome, String email, TipoAcesso tipoAcesso) {
-        super(nome, email, tipoAcesso);
+
+    public Professor() {
+        super();
+    }
+
+    public Professor(String nome, String email) {
+        super(nome, email, TipoAcesso.Professor.name());
     }
 
     public List<Estudante> visualizarEstudantesCadastradosEletiva(Eletiva eletiva) {

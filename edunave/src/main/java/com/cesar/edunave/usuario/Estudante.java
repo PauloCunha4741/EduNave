@@ -10,8 +10,8 @@ import com.cesar.edunave.enums.Turma;
 public class Estudante extends Usuario {
     private Turma turma;
 
-    public Estudante(String nome, String email, TipoAcesso tipoAcesso, Turma turma) {
-        super(nome, email, tipoAcesso);
+    public Estudante(String nome, String email, Turma turma) {
+        super(nome, email, TipoAcesso.Estudante.name());
         if (validarTurma(turma)) {
             this.turma = turma;
         } else {

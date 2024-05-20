@@ -7,18 +7,25 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.cesar.edunave.eletiva.Eletiva;
+import com.cesar.edunave.enums.Diretorio;
 import com.cesar.edunave.enums.TipoAcesso;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-abstract class Usuario {
+public class Usuario {
     private int id;
     private String nome;
     private String email;
     private String senha;
-    private TipoAcesso tipoAcesso;
+    private String tipoAcesso;
 
-    public Usuario(String nome, String email, TipoAcesso tipoAcesso) {
+    private static final String USUARIO_JSON_FILE_PATH = Diretorio.UsuarioJson.getCaminho();
+
+    public Usuario() {}
+
+    public Usuario(String nome, String email, String tipoAcesso) {
         this.id = retorneProximoId();
         this.nome = nome;
         if (validarEmail(email)) {
@@ -70,11 +77,11 @@ abstract class Usuario {
 		this.senha = senha;
 	}
 
-	public TipoAcesso getTipoAcesso() {
+	public String getTipoAcesso() {
 		return this.tipoAcesso;
 	}
 
-	public void setTipoAcesso(TipoAcesso tipoAcesso) {
+	public void setTipoAcesso(String tipoAcesso) {
 		if (validarTipoAcesso(tipoAcesso)) {
             this.tipoAcesso = tipoAcesso;
         } else {
@@ -83,16 +90,36 @@ abstract class Usuario {
 	}
 
     private boolean validarEmail(String email) {
-        return email != null && email.contains("@") && email.contains(".");
+        if (email == null || !email.contains("@") || !email.contains(".")) {
+            System.out.println("O email é inválido.");
+            return false;
+        }
+        File file = new File(USUARIO_JSON_FILE_PATH);
+        if (file.exists() && !file.isDirectory()) {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                List<Usuario> usuarios = mapper.readValue(file, new TypeReference<List<Usuario>>(){});
+                for (Usuario usuario : usuarios) {
+                    System.out.println(usuario.getEmail());
+                    if (usuario.getEmail().equals(email)) {
+                        System.out.println("O email já foi cadastrado.");
+                        return false;
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
     }
 
-    private boolean validarTipoAcesso(TipoAcesso tipoAcesso) {
-        List<TipoAcesso> tiposAcesso = Arrays.asList(TipoAcesso.values());
+    private boolean validarTipoAcesso(String tipoAcesso) {
+        List<String> tiposAcesso = Arrays.asList("Gestor", "Professor", "Estudante");
         return tiposAcesso.contains(tipoAcesso);
     }
 
     private int retorneProximoId() {
-        File file = new File("resources/data/usuario.json");
+        File file = new File(USUARIO_JSON_FILE_PATH);
         if (file.exists() && !file.isDirectory()) {
             try {
                 ObjectMapper mapper = new ObjectMapper();
