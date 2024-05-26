@@ -1,0 +1,18 @@
+[
+    {
+        "senha": "Xiv6LuU3",
+        "nome": "Marcelo",
+        "id": 1,
+        "turma": "PrimeiroAno",
+        "tipoAcesso": "Estudante",
+        "email": "marcelo@cesar.school"
+    },
+    {
+        "senha": "123456",
+        "nome": "Paulo",
+        "id": 2,
+        "turma": "",
+        "tipoAcesso": "Professor",
+        "email": "paulo.cunha@cesar.school"
+    }
+]

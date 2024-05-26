@@ -2,13 +2,17 @@ package com.cesar.edunave.usuario;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import com.cesar.edunave.eletiva.Eletiva;
 import com.cesar.edunave.enums.Diretorio;
-import com.cesar.edunave.enums.TipoAcesso;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -20,12 +24,13 @@ public class Usuario {
     private String email;
     private String senha;
     private String tipoAcesso;
+    private String turma = "";
 
     private static final String USUARIO_JSON_FILE_PATH = Diretorio.UsuarioJson.getCaminho();
 
     public Usuario() {}
 
-    public Usuario(String nome, String email, String tipoAcesso) {
+    public Usuario(String nome, String email, String tipoAcesso, String turma) {
         this.id = retorneProximoId();
         this.nome = nome;
         if (validarEmail(email)) {
@@ -38,6 +43,11 @@ public class Usuario {
             this.tipoAcesso = tipoAcesso;
         } else {
             throw new IllegalArgumentException("O tipo de acesso fornecido é inválido.");
+        }
+        if (validarTurma(turma)) {
+            this.turma = turma;
+        } else {
+            throw new IllegalArgumentException("A turma fornecida é inválida.");
         }
     }
 
@@ -62,11 +72,7 @@ public class Usuario {
 	}
 
 	public void setEmail(String email) {
-        if (validarEmail(email)) {
-            this.email = email;
-        } else {
-            throw new IllegalArgumentException("O e-mail fornecido é inválido.");
-        }
+        this.email = email;
 	}
 
 	public String getSenha() {
@@ -89,33 +95,30 @@ public class Usuario {
         }
 	}
 
+    public String getTurma() {
+		return this.turma;
+	}
+
+	public void setTurma(String turma) {
+		this.turma = turma;
+	}
+
     private boolean validarEmail(String email) {
         if (email == null || !email.contains("@") || !email.contains(".")) {
             System.out.println("O email é inválido.");
             return false;
         }
-        File file = new File(USUARIO_JSON_FILE_PATH);
-        if (file.exists() && !file.isDirectory()) {
-            try {
-                ObjectMapper mapper = new ObjectMapper();
-                List<Usuario> usuarios = mapper.readValue(file, new TypeReference<List<Usuario>>(){});
-                for (Usuario usuario : usuarios) {
-                    System.out.println(usuario.getEmail());
-                    if (usuario.getEmail().equals(email)) {
-                        System.out.println("O email já foi cadastrado.");
-                        return false;
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
         return true;
     }
 
-    private boolean validarTipoAcesso(String tipoAcesso) {
+    public boolean validarTipoAcesso(String tipoAcesso) {
         List<String> tiposAcesso = Arrays.asList("Gestor", "Professor", "Estudante");
         return tiposAcesso.contains(tipoAcesso);
+    }
+
+    public boolean validarTurma(String turma) {
+        List<String> turmas = Arrays.asList("PrimeiroAno", "SegundoAno", "TerceiroAno");
+        return turmas.contains(turma) || turma == "";
     }
 
     private int retorneProximoId() {
@@ -131,7 +134,7 @@ public class Usuario {
                 e.printStackTrace();
             }
         }
-        return 1; // Se o arquivo não existir ou não conter nenhum usuário, retorna 1 como ID padrão
+        return 1;
     }
 
     private String gerarSenhaAleatoria() {
@@ -150,8 +153,25 @@ public class Usuario {
         return false;
     }
 
-    public void modificarSenha(String senhaNova) {
-        // Implementação do método
+    public void modificarSenha(String novaSenha) {
+        try {
+            String content = new String(Files.readAllBytes(Paths.get(USUARIO_JSON_FILE_PATH)));
+
+            JSONArray jsonArray = new JSONArray(content);
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject user = jsonArray.getJSONObject(i);
+                if (user.getString("email").equals(this.email)) {
+                    user.put("senha", novaSenha);
+                    break;
+                }
+            }
+
+            Files.write(Paths.get(USUARIO_JSON_FILE_PATH), jsonArray.toString(4).getBytes());
+            System.out.println("Senha modificada com sucesso.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public List<Eletiva> listaEletivasCadastradas() {
