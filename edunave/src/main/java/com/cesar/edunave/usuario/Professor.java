@@ -7,7 +7,7 @@ import com.cesar.edunave.enums.TipoAcesso;
 
 public class Professor extends Usuario {
 
-    public Professor() {
+    public Professor(String nomeProfessor, String emailProfessor, TipoAcesso professor) {
         super();
     }
 
@@ -16,7 +16,6 @@ public class Professor extends Usuario {
     }
 
     public List<Estudante> visualizarEstudantesCadastradosEletiva(Eletiva eletiva) {
-        // Implementação do método
-        return null;
+        return eletiva.getEstudantesCadastrados();
     }
 }

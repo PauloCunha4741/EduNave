@@ -14,85 +14,107 @@ public class Eletiva {
     private List<String> bibliografia;
     private Turma turma;
     private List<Estudante> estudantesCadastrados;
+    private int limiteVagas;
+    private boolean bloqueada;
 
-    public Eletiva(int id, String titulo, String ementa, Professor docenteResponsavel, List<String> bibliografia, Turma turma, List<Estudante> estudantesCadastrados) {
-        this.id = id;
-        this.titulo = titulo;
-        this.ementa = ementa;
-        this.docenteResponsavel = docenteResponsavel;
-        this.bibliografia = bibliografia;
-        this.turma = turma;
-        this.estudantesCadastrados = estudantesCadastrados;
+    public Eletiva(int id, String titulo, String ementa, Professor docenteResponsavel, List<String> bibliografia, Turma turma, List<Estudante> estudantesCadastrados, int limiteVagas) {
+			this.id = id;
+			this.titulo = titulo;
+			this.ementa = ementa;
+			this.docenteResponsavel = docenteResponsavel;
+			this.bibliografia = bibliografia;
+			this.turma = turma;
+			this.estudantesCadastrados = estudantesCadastrados;
+			this.limiteVagas = limiteVagas;
+			this.bloqueada = false;
     }
 
-	public int getId() {
-		return this.id;
-	}
+    public int getId() {
+      return id;
+    }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public void setId(int id) {
+      this.id = id;
+    }
 
-	public String getTitulo() {
-		return this.titulo;
-	}
+    public String getTitulo() {
+      return titulo;
+    }
 
-	public void setTitulo(String titulo) {
-		this.titulo = titulo;
-	}
+    public void setTitulo(String titulo) {
+      this.titulo = titulo;
+    }
 
-	public String getEmenta() {
-		return this.ementa;
-	}
+    public String getEmenta() {
+      return ementa;
+    }
 
-	public void setEmenta(String ementa) {
-		this.ementa = ementa;
-	}
+    public void setEmenta(String ementa) {
+      this.ementa = ementa;
+    }
 
-	public Professor getDocenteResponsavel() {
-		return this.docenteResponsavel;
-	}
+    public Professor getDocenteResponsavel() {
+      return docenteResponsavel;
+    }
 
-	public void setDocenteResponsavel(Professor docenteResponsavel) {
-		this.docenteResponsavel = docenteResponsavel;
-	}
+    public void setDocenteResponsavel(Professor docenteResponsavel) {
+      this.docenteResponsavel = docenteResponsavel;
+    }
 
-	public List<String> getBibliografia() {
-		return this.bibliografia;
-	}
+    public List<String> getBibliografia() {
+      return bibliografia;
+    }
 
-	public void setBibliografia(List<String> bibliografia) {
-		this.bibliografia = bibliografia;
-	}
+    public void setBibliografia(List<String> bibliografia) {
+      this.bibliografia = bibliografia;
+    }
 
-	public Turma getTurma() {
-		return this.turma;
-	}
+    public Turma getTurma() {
+      return turma;
+    }
 
-	public void setTurma(Turma turma) {
-		this.turma = turma;
-	}
+    public void setTurma(Turma turma) {
+      this.turma = turma;
+    }
 
-	public List<Estudante> getEstudantesCadastrados() {
-		return this.estudantesCadastrados;
-	}
+    public List<Estudante> getEstudantesCadastrados() {
+      return estudantesCadastrados;
+    }
 
-	public void setEstudantesCadastrados(List<Estudante> estudantesCadastrados) {
-		this.estudantesCadastrados = estudantesCadastrados;
-	}
+    public void setEstudantesCadastrados(List<Estudante> estudantesCadastrados) {
+      this.estudantesCadastrados = estudantesCadastrados;
+    }
 
+    public boolean isBloqueada() {
+      return bloqueada;
+    }
+
+    public void setBloqueada(boolean bloqueada) {
+      this.bloqueada = bloqueada;
+    }
 
     public boolean cadastrarEstudante(Estudante estudante) {
-        // Implementação do método
-        return false;
+			// Não realiza o cadastro do estudante se a eletiva estiver: bloqueada ou estudante já cadastrado ou a quantidade de estudantes já cadastrados exceder o limite de vagas
+			if (bloqueada || estudantesCadastrados.contains(estudante) || estudantesCadastrados.size() >= limiteVagas) {
+				return false;
+			}
+
+			// Cadastrando de fato o estudante na eletiva
+			estudantesCadastrados.add(estudante);
+
+			// Verifica se após adicionar o estudante, a eletiva atingiu seu limite
+			if (estudantesCadastrados.size() >= limiteVagas) {
+				bloquearEscolha();
+			}
+
+			return true; // Estudante cadastrado com sucesso
     }
 
     public int verificarVagasDisponiveis() {
-        // Implementação do método
-        return 0;
+      return limiteVagas - estudantesCadastrados.size();
     }
 
-    private void bloquearEscolha(Eletiva eletiva) {
-        // Implementação do método
+    private void bloquearEscolha() {
+     this.bloqueada = true;
     }
 }
