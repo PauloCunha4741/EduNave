@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,6 +26,7 @@ public class Usuario {
     private String turma = "";
 
     private static final String USUARIO_JSON_FILE_PATH = Diretorio.UsuarioJson.getCaminho();
+    private static final String ELETIVA_JSON_FILE_PATH = Diretorio.EletivaJson.getCaminho();
 
     public Usuario() {}
 
@@ -193,7 +195,15 @@ public class Usuario {
     }
 
     public List<Eletiva> listaEletivasCadastradas() {
-        // Implementação do método
-        return null;
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<Eletiva> eletivas = new ArrayList<>();
+
+        try {
+            eletivas = objectMapper.readValue(new File(ELETIVA_JSON_FILE_PATH), new TypeReference<List<Eletiva>>(){});
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return eletivas;
     }
 }
