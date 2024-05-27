@@ -7,7 +7,7 @@ import com.cesar.edunave.enums.TipoAcesso;
 
 public class Professor extends Usuario {
 
-    public Professor(String nomeProfessor, String emailProfessor, TipoAcesso professor) {
+    public Professor() {
         super();
     }
 

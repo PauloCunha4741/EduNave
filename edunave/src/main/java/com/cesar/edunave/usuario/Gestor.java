@@ -10,6 +10,7 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.cesar.edunave.eletiva.Eletiva;
 import com.cesar.edunave.enums.Diretorio;
 import com.cesar.edunave.enums.TipoAcesso;
 import com.cesar.edunave.enums.Turma;
@@ -28,17 +29,196 @@ public class Gestor extends Usuario {
     }
 
     private static final String USUARIO_JSON_FILE_PATH = Diretorio.UsuarioJson.getCaminho();
+    private static final String ELETIVA_JSON_FILE_PATH = Diretorio.EletivaJson.getCaminho();
 
-    public void cadastrarEletiva(String titulo, String ementa, Professor docenteResponsavel, List<String> bibliografia, Turma turma) {
-        // Implementação do método
+    public boolean cadastrarEletiva(String titulo, String ementa, Professor docenteResponsavel, List<String> bibliografia, Turma turma) {
+        if (!verificarTituloEletivaDuplicado(titulo)) {
+            return false;
+        }
+        
+        if (!validarProfessorCadastrado(docenteResponsavel.getEmail())) {
+            System.out.println("Não encontrado cadastro para professor(a) selecionado(a).");
+            return false;
+        }
+
+        if (!validarDisponibilidadeEletivasParaTurma(turma)) {
+            return false;
+        }
+
+        Eletiva eletiva = new Eletiva(titulo, ementa, docenteResponsavel, bibliografia, turma.name());
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+        List<Eletiva> eletivas = new ArrayList<>();
+        File file = new File(ELETIVA_JSON_FILE_PATH);
+
+        if (file.exists() && file.length() != 0) {
+            try {
+                eletivas = objectMapper.readValue(file, new TypeReference<List<Eletiva>>(){});
+            } catch (IOException e) {
+                System.out.println("Erro ao ler eletivas existentes: " + e.getMessage());
+                return false;
+            }
+        }
+
+        eletivas.add(eletiva);
+
+        try {
+            objectMapper.writeValue(file, eletivas);
+            System.out.println("Eletiva cadastrado com sucesso.");
+            return true;
+        } catch (IOException e) {
+            System.out.println("Erro ao salvar eletiva: " + e.getMessage());
+            return false;
+        }
     }
 
-    public void editarEletiva(int idEletiva, String titulo, String ementa, String docenteResponsavel, List<String> bibliografia) {
-        // Implementação do método
+    public boolean editarEletiva(String titulo, String ementa, Professor docenteResponsavel, List<String> bibliografia, Turma turma) {
+        if (!validarTurma(turma.name())) {
+            return false;
+        }
+
+        if (!validarProfessorCadastrado(docenteResponsavel.getEmail())) {
+            System.out.println("Não encontrado cadastro para professor(a) selecionado(a).");
+            return false;
+        }
+
+        try {
+            String content = new String(Files.readAllBytes(Paths.get(ELETIVA_JSON_FILE_PATH)));
+
+            JSONArray jsonArray = new JSONArray(content);
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject eletiva = jsonArray.getJSONObject(i);
+                if (eletiva.getString("titulo").equals(titulo)) {
+                    if (turma.name() == ""){
+                        System.out.println("A Eletiva não pode ficar sem turma definida.");
+                        return false;
+                    }
+                    if (!eletiva.getString("turma").equals(turma.name())) {
+                        if (!validarDisponibilidadeEletivasParaTurma(turma)) {
+                            return false;
+                        }
+                    }
+                    eletiva.put("titulo", titulo);
+                    eletiva.put("ementa", ementa);
+                    eletiva.put("docenteResponsavel", docenteResponsavel);
+                    eletiva.put("bibliografia", docenteResponsavel);
+                    eletiva.put("turma", turma.name());
+                    break;
+                }
+            }
+
+            Files.write(Paths.get(ELETIVA_JSON_FILE_PATH), jsonArray.toString(4).getBytes());
+            System.out.println("Eletiva modificada com sucesso.");
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
-    public void deletarEletiva(int idEletiva) {
-        // Implementação do método
+    public boolean deletarEletiva(String titulo) {
+        try {
+            String content = new String(Files.readAllBytes(Paths.get(ELETIVA_JSON_FILE_PATH)));
+
+            JSONArray jsonArray = new JSONArray(content);
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject eletiva = jsonArray.getJSONObject(i);
+                if (eletiva.getString("titulo").equals(titulo)) {
+                    jsonArray.remove(i);
+                    break;
+                }
+            }
+
+            Files.write(Paths.get(ELETIVA_JSON_FILE_PATH), jsonArray.toString(4).getBytes());
+            System.out.println("Eletiva excluída com sucesso.");
+            return true;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Processo de exclusão de eletiva não foi concluído.");
+        return false;
+    }
+
+    public boolean validarProfessorCadastrado(String email) {
+        List<Usuario> todosUsuarios = new ArrayList<>();
+        List<Usuario> professor = new ArrayList<>();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+        File file = new File(USUARIO_JSON_FILE_PATH);
+
+        if (file.exists() && file.length() != 0) {
+            try {
+                todosUsuarios = objectMapper.readValue(file, new TypeReference<List<Usuario>>(){});
+                
+                for (Usuario usuario : todosUsuarios) {
+                    if ("Professor".equals(usuario.getTipoAcesso()) && email.equals(usuario.getEmail())) {
+                        professor.add(usuario);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (professor.isEmpty()) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private boolean verificarTituloEletivaDuplicado(String titulo) {
+        File file = new File(ELETIVA_JSON_FILE_PATH);
+        if (file.exists() && file.length() != 0) {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                List<Eletiva> eletivas = mapper.readValue(file, new TypeReference<List<Eletiva>>(){});
+                for (Eletiva eletiva : eletivas) {
+                    if (eletiva.getTitulo().equals(titulo)) {
+                        System.out.println("A eletiva já foi cadastrada.");
+                        return false;
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
+    }
+
+    private boolean validarDisponibilidadeEletivasParaTurma(Turma turma) {
+        File file = new File(ELETIVA_JSON_FILE_PATH);
+        int counter = 0;
+        if (file.exists() && !file.isDirectory() && file.length() != 0) {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                List<Eletiva> eletivas = mapper.readValue(file, new TypeReference<List<Eletiva>>(){});
+                for (Eletiva eletiva : eletivas) {
+                    if (eletiva.getTurma().equals(turma.name())) {
+                        counter += 1;
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            if (turma.name().equals("SegundoAno") && counter <= 7) {
+                return true;
+            } else if ((turma.name().equals("PrimeiroAno") || turma.name().equals("TerceiroAno")) && counter <= 3) {
+                return true;
+            } else {
+                System.out.println("A quantidade limite de eletivas cadastradas para a turma selecionada já foi alcançada.");
+                return false;
+            }
+        }
+        return true;
     }
 
     public boolean cadastrarUsuario(String nome, String email, TipoAcesso tipoAcesso) {
@@ -191,6 +371,7 @@ public class Gestor extends Usuario {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println("Processo de exclusão de usuário não foi concluído.");
         return false;
     }
 
@@ -202,9 +383,24 @@ public class Gestor extends Usuario {
         // Implementação do método
     }
 
-    public List<Estudante> listaEstudantesCadastrados() {
-        // Implementação do método
-        return null;
+    public List<Usuario> listaEstudantesCadastrados() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<Usuario> todosUsuarios = new ArrayList<>();
+        List<Usuario> usuariosEstudantes = new ArrayList<>();
+
+        try {
+            todosUsuarios = objectMapper.readValue(new File(USUARIO_JSON_FILE_PATH), new TypeReference<List<Usuario>>(){});
+            
+            for (Usuario usuario : todosUsuarios) {
+                if ("Estudante".equals(usuario.getTipoAcesso())) {
+                    usuariosEstudantes.add(usuario);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return usuariosEstudantes;
     }
 
     public List<Estudante> listaEstudantesAusentes() {
@@ -212,8 +408,23 @@ public class Gestor extends Usuario {
         return null;
     }
 
-    public List<Estudante> listaGestoresCadastrados() {
-        // Implementação do método
-        return null;
+    public List<Usuario> listaGestoresCadastrados() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<Usuario> todosUsuarios = new ArrayList<>();
+        List<Usuario> usuariosGestores = new ArrayList<>();
+
+        try {
+            todosUsuarios = objectMapper.readValue(new File(USUARIO_JSON_FILE_PATH), new TypeReference<List<Usuario>>(){});
+            
+            for (Usuario usuario : todosUsuarios) {
+                if ("Gestor".equals(usuario.getTipoAcesso())) {
+                    usuariosGestores.add(usuario);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return usuariosGestores;
     }
 }

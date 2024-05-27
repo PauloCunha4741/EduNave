@@ -1,10 +1,15 @@
 package com.cesar.edunave.eletiva;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
-import com.cesar.edunave.enums.Turma;
+import com.cesar.edunave.enums.Diretorio;
 import com.cesar.edunave.usuario.Estudante;
 import com.cesar.edunave.usuario.Professor;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Eletiva {
     private int id;
@@ -12,22 +17,25 @@ public class Eletiva {
     private String ementa;
     private Professor docenteResponsavel;
     private List<String> bibliografia;
-    private Turma turma;
+    private String turma;
     private List<Estudante> estudantesCadastrados;
     private int limiteVagas;
     private boolean bloqueada;
 
-    public Eletiva(int id, String titulo, String ementa, Professor docenteResponsavel, List<String> bibliografia, Turma turma, List<Estudante> estudantesCadastrados, int limiteVagas) {
-			this.id = id;
+    public Eletiva() {}
+
+    public Eletiva(String titulo, String ementa, Professor docenteResponsavel, List<String> bibliografia, String turma) {
+			this.id = retorneProximoId();
 			this.titulo = titulo;
 			this.ementa = ementa;
 			this.docenteResponsavel = docenteResponsavel;
 			this.bibliografia = bibliografia;
 			this.turma = turma;
-			this.estudantesCadastrados = estudantesCadastrados;
-			this.limiteVagas = limiteVagas;
+			this.estudantesCadastrados = new ArrayList<>();
 			this.bloqueada = false;
     }
+
+    private static final String ELETIVA_JSON_FILE_PATH = Diretorio.EletivaJson.getCaminho();
 
     public int getId() {
       return id;
@@ -69,11 +77,11 @@ public class Eletiva {
       this.bibliografia = bibliografia;
     }
 
-    public Turma getTurma() {
+    public String getTurma() {
       return turma;
     }
 
-    public void setTurma(Turma turma) {
+    public void setTurma(String turma) {
       this.turma = turma;
     }
 
@@ -85,7 +93,7 @@ public class Eletiva {
       this.estudantesCadastrados = estudantesCadastrados;
     }
 
-    public boolean isBloqueada() {
+    public boolean getBloqueada() {
       return bloqueada;
     }
 
@@ -93,28 +101,24 @@ public class Eletiva {
       this.bloqueada = bloqueada;
     }
 
-    public boolean cadastrarEstudante(Estudante estudante) {
-			// Não realiza o cadastro do estudante se a eletiva estiver: bloqueada ou estudante já cadastrado ou a quantidade de estudantes já cadastrados exceder o limite de vagas
-			if (bloqueada || estudantesCadastrados.contains(estudante) || estudantesCadastrados.size() >= limiteVagas) {
-				return false;
-			}
-
-			// Cadastrando de fato o estudante na eletiva
-			estudantesCadastrados.add(estudante);
-
-			// Verifica se após adicionar o estudante, a eletiva atingiu seu limite
-			if (estudantesCadastrados.size() >= limiteVagas) {
-				bloquearEscolha();
-			}
-
-			return true; // Estudante cadastrado com sucesso
+    private int retorneProximoId() {
+        File file = new File(ELETIVA_JSON_FILE_PATH);
+        if (file.exists() && !file.isDirectory()) {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                List<Eletiva> eletivas = mapper.readValue(file, new TypeReference<List<Eletiva>>(){});
+                if (!eletivas.isEmpty()) {
+                    return eletivas.get(eletivas.size() - 1).getId() + 1;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return 1;
     }
 
     public int verificarVagasDisponiveis() {
       return limiteVagas - estudantesCadastrados.size();
     }
 
-    private void bloquearEscolha() {
-     this.bloqueada = true;
-    }
 }

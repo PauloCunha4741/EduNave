@@ -13,8 +13,6 @@ import org.json.JSONObject;
 
 import com.cesar.edunave.eletiva.Eletiva;
 import com.cesar.edunave.enums.Diretorio;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -31,7 +29,7 @@ public class Usuario {
     public Usuario() {}
 
     public Usuario(String nome, String email, String tipoAcesso, String turma) {
-        this.id = retorneProximoId();
+        this.id = retorneProximoId(email);
         this.nome = nome;
         if (validarEmail(email)) {
             this.email = email;
@@ -104,7 +102,7 @@ public class Usuario {
 	}
 
     private boolean validarEmail(String email) {
-        if (email == null || !email.contains("@") || !email.contains(".")) {
+        if (email == null || !email.contains("@nave.org.br")) {
             System.out.println("O email é inválido.");
             return false;
         }
@@ -121,13 +119,19 @@ public class Usuario {
         return turmas.contains(turma) || turma == "";
     }
 
-    private int retorneProximoId() {
+    private int retorneProximoId(String email) {
         File file = new File(USUARIO_JSON_FILE_PATH);
         if (file.exists() && !file.isDirectory()) {
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 List<Usuario> usuarios = mapper.readValue(file, new TypeReference<List<Usuario>>(){});
                 if (!usuarios.isEmpty()) {
+                    
+                    for (Usuario usuario : usuarios) {
+                        if (email.equals(usuario.getEmail())) {
+                            return usuario.getId();
+                        }
+                    }
                     return usuarios.get(usuarios.size() - 1).getId() + 1;
                 }
             } catch (IOException e) {
@@ -145,12 +149,26 @@ public class Usuario {
             int index = random.nextInt(caracteres.length());
             senhaAleatoria.append(caracteres.charAt(index));
         }
-        return senhaAleatoria.toString();
-    }
 
-    public boolean login(String email, String senha) {
-        // Implementação do método
-        return false;
+        File file = new File(USUARIO_JSON_FILE_PATH);
+        if (file.exists() && !file.isDirectory()) {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                List<Usuario> usuarios = mapper.readValue(file, new TypeReference<List<Usuario>>(){});
+                if (!usuarios.isEmpty()) {
+                    
+                    for (Usuario usuario : usuarios) {
+                        if (email.equals(usuario.getEmail())) {
+                            return usuario.getSenha();
+                        }
+                    }
+                    return senhaAleatoria.toString();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return senhaAleatoria.toString();
     }
 
     public void modificarSenha(String novaSenha) {

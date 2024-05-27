@@ -1,18 +1,29 @@
-[
-    {
-        "senha": "Xiv6LuU3",
-        "nome": "Marcelo",
-        "id": 1,
-        "turma": "PrimeiroAno",
-        "tipoAcesso": "Estudante",
-        "email": "marcelo@cesar.school"
-    },
-    {
-        "senha": "123456",
-        "nome": "Paulo",
-        "id": 2,
-        "turma": "",
-        "tipoAcesso": "Professor",
-        "email": "paulo.cunha@cesar.school"
-    }
-]
+[ {
+  "id" : 1,
+  "nome" : "Ana Silva",
+  "email" : "ana.silva@nave.org.br",
+  "senha" : "9zxDP45M",
+  "tipoAcesso" : "Professor",
+  "turma" : ""
+}, {
+  "id" : 2,
+  "nome" : "Marcelo Cabral",
+  "email" : "marcelo.cabral@nave.org.br",
+  "senha" : "j2H4Od7D",
+  "tipoAcesso" : "Estudante",
+  "turma" : "SegundoAno"
+}, {
+  "id" : 3,
+  "nome" : "Carol Cordeiro",
+  "email" : "carol.cordeiro@nave.org.br",
+  "senha" : "VD5rYLoP",
+  "tipoAcesso" : "Estudante",
+  "turma" : "SegundoAno"
+}, {
+  "id" : 4,
+  "nome" : "Eduarda Borges",
+  "email" : "eduarda.borges@nave.org.br",
+  "senha" : "zdUAazcS",
+  "tipoAcesso" : "Gestor",
+  "turma" : ""
+} ]

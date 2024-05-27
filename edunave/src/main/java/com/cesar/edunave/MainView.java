@@ -1,29 +1,35 @@
 package com.cesar.edunave;
 
-import com.vaadin.flow.component.Key;
+import com.cesar.edunave.login.LoginService;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 
 @Route("")
 public class MainView extends VerticalLayout{
+    private LoginService loginService;
 
     public MainView() {
-        VerticalLayout todosList = new VerticalLayout();
-        TextField textField = new TextField();
-        Button addButton = new Button("Add");
-        addButton.addClickListener(click -> {
-            Checkbox checkbox = new Checkbox(textField.getValue());
-            todosList.add(checkbox);
-            textField.setValue("");
-        });
-        addButton.addClickShortcut(Key.ENTER);
+        loginService = new LoginService();
 
-        add(new H1("Vaadin Todo"), todosList, new HorizontalLayout(textField, addButton));
+        TextField emailField = new TextField("Email");
+        PasswordField senhaField = new PasswordField("Senha");
+        Button loginButton = new Button("Login");
+
+        loginButton.addClickListener(event -> {
+            String email = emailField.getValue();
+            String senha = senhaField.getValue();
+            if (loginService.validarCredenciais(email, senha)) {
+                Notification.show("Login bem-sucedido!");
+            } else {
+                Notification.show("Credenciais inválidas.");
+            }
+        });
+
+        add(emailField, senhaField, loginButton);
     }
 
 }

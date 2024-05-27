@@ -1,0 +1,37 @@
+[{
+    "ementa": "Estudo avançado de matemática",
+    "docenteResponsavel": {
+        "senha": "CMVk0Ddb",
+        "nome": "Ana Silva",
+        "id": 1,
+        "turma": "",
+        "tipoAcesso": "Professor",
+        "email": "ana.silva@nave.org.br"
+    },
+    "titulo": "Matemática Avançada",
+    "bloqueada": false,
+    "id": 1,
+    "turma": "SegundoAno",
+    "estudantesCadastrados": [
+        {
+            "senha": "j2H4Od7D",
+            "nome": "Marcelo Cabral",
+            "id": 2,
+            "turma": "SegundoAno",
+            "tipoAcesso": "Estudante",
+            "email": "marcelo.cabral@nave.org.br"
+        },
+        {
+            "senha": "VD5rYLoP",
+            "nome": "Carol Cordeiro",
+            "id": 3,
+            "turma": "SegundoAno",
+            "tipoAcesso": "Estudante",
+            "email": "carol.cordeiro@nave.org.br"
+        }
+    ],
+    "bibliografia": [
+        "Livro A",
+        "Livro B"
+    ]
+}]
