@@ -24,15 +24,17 @@ public class Usuario {
     private String senha;
     private String tipoAcesso;
     private String turma = "";
+    private Boolean cadastradoEmEletiva = false;    
 
     private static final String USUARIO_JSON_FILE_PATH = Diretorio.UsuarioJson.getCaminho();
     private static final String ELETIVA_JSON_FILE_PATH = Diretorio.EletivaJson.getCaminho();
 
     public Usuario() {}
 
-    public Usuario(String nome, String email, String tipoAcesso, String turma) {
+    public Usuario(String nome, String email, String tipoAcesso, String turma, Boolean cadastradoEmEletiva) {
         this.id = retorneProximoId(email);
         this.nome = nome;
+        this.cadastradoEmEletiva = cadastradoEmEletiva;
         if (validarEmail(email)) {
             this.email = email;
         } else {
@@ -85,6 +87,14 @@ public class Usuario {
 
 	public String getTipoAcesso() {
 		return this.tipoAcesso;
+	}
+
+    public Boolean getCadastradoEmEletiva() {
+		return this.cadastradoEmEletiva;
+	}
+
+    public void setCadastradoEmEletiva(Boolean valor) {
+		this.cadastradoEmEletiva = valor;
 	}
 
 	public void setTipoAcesso(String tipoAcesso) {

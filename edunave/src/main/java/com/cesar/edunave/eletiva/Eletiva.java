@@ -33,6 +33,7 @@ public class Eletiva {
 			this.turma = turma;
 			this.estudantesCadastrados = new ArrayList<>();
 			this.bloqueada = false;
+      this.limiteVagas = 40;
     }
 
     private static final String ELETIVA_JSON_FILE_PATH = Diretorio.EletivaJson.getCaminho();

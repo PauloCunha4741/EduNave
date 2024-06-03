@@ -14,7 +14,17 @@
     "turma": "SegundoAno",
     "estudantesCadastrados": [
         {
+            "senha": "3hTxMiHK",
+            "cadastradoEmEletiva": true,
+            "nome": "Dudui Dias",
+            "id": 10,
+            "turma": "SegundoAno",
+            "tipoAcesso": "Estudante",
+            "email": "mateu1s.dias@nave.org.br"
+        },
+        {
             "senha": "j2H4Od7D",
+            "cadastradoEmEletiva": true,
             "nome": "Marcelo Cabral",
             "id": 2,
             "turma": "SegundoAno",
@@ -22,12 +32,49 @@
             "email": "marcelo.cabral@nave.org.br"
         },
         {
+            "senha": "m9WmG6si",
+            "cadastradoEmEletiva": true,
+            "nome": "Ana Clara",
+            "id": 5,
+            "turma": "SegundoAno",
+            "tipoAcesso": "Estudante",
+            "email": "ana.clara@nave.org.br"
+        },
+        {
+            "senha": "CvJ4Rc8F",
+            "cadastradoEmEletiva": true,
+            "nome": "Tomas Molina",
+            "id": 7,
+            "turma": "SegundoAno",
+            "tipoAcesso": "Estudante",
+            "email": "tomas.molina@nave.org.br"
+        },
+        {
             "senha": "VD5rYLoP",
+            "cadastradoEmEletiva": true,
             "nome": "Carol Cordeiro",
             "id": 3,
             "turma": "SegundoAno",
             "tipoAcesso": "Estudante",
             "email": "carol.cordeiro@nave.org.br"
+        },
+        {
+            "senha": "6GsMsBII",
+            "cadastradoEmEletiva": true,
+            "nome": "Dante Molina",
+            "id": 8,
+            "turma": "SegundoAno",
+            "tipoAcesso": "Estudante",
+            "email": "dante.molina@nave.org.br"
+        },
+        {
+            "senha": "PumD19Kc",
+            "cadastradoEmEletiva": true,
+            "nome": "Riane Junqueira",
+            "id": 6,
+            "turma": "SegundoAno",
+            "tipoAcesso": "Estudante",
+            "email": "riane.junqueira@nave.org.br"
         }
     ],
     "bibliografia": [

@@ -7,7 +7,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -24,8 +23,8 @@ public class Estudante extends Usuario {
         super();
     }
 
-    public Estudante(String nome, String email, String turma) {
-        super(nome, email, TipoAcesso.Estudante.name(), turma);
+    public Estudante(String nome, String email, String turma, Boolean cadastradoEmEletiva) {
+        super(nome, email, TipoAcesso.Estudante.name(), turma, cadastradoEmEletiva);
     }
 
     private static final String ELETIVA_JSON_FILE_PATH = Diretorio.EletivaJson.getCaminho();
@@ -38,6 +37,8 @@ public class Estudante extends Usuario {
         jsonObject.put("senha", this.getSenha());
         jsonObject.put("tipoAcesso", this.getTipoAcesso());
         jsonObject.put("turma", this.getTurma());
+        jsonObject.put("cadastradoEmEletiva", this.getCadastradoEmEletiva());
+        
         return jsonObject;
     }
 
@@ -93,6 +94,9 @@ public class Estudante extends Usuario {
                         eletiva.put("bloqueada", true);
                     }
 
+                    this.setCadastradoEmEletiva(true);
+                    Gestor gestor = new Gestor();
+                    gestor.editarUsuario(this.getEmail(),this.getNome(), this.getTipoAcesso(), this.getTurma(), this.getCadastradoEmEletiva());
                     estudantesCadastrados.put(this.toJSONObject());
                     Files.write(Paths.get(ELETIVA_JSON_FILE_PATH), jsonArray.toString(4).getBytes());
                     System.out.println("Estudante inscrito na eletiva com sucesso.");
@@ -155,17 +159,11 @@ public class Estudante extends Usuario {
 
         return false;
     }
-    
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        Estudante estudante = (Estudante) obj;
-        return this.getEmail().equals(estudante.getEmail()); // Exemplo de comparação, ajuste conforme necessário
-    }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(getEmail()); // Correspondente ao método equals
+    public String toString() {
+        return "Nome:'" + this.getNome() + '\'' +
+                ", Turma:'" + this.getTurma() + '\'' +
+                ", Email:'" + this.getEmail() + '\'';
     }
 }

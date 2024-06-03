@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -14,9 +15,9 @@ import com.cesar.edunave.eletiva.Eletiva;
 import com.cesar.edunave.enums.Diretorio;
 import com.cesar.edunave.enums.TipoAcesso;
 import com.cesar.edunave.enums.Turma;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.core.type.TypeReference;
 
 public class Gestor extends Usuario {
 
@@ -25,7 +26,7 @@ public class Gestor extends Usuario {
     }
 
     public Gestor(String nome, String email) {
-        super(nome, email, TipoAcesso.Gestor.name(), "");
+        super(nome, email, TipoAcesso.Gestor.name(), "", false);
     }
 
     private static final String USUARIO_JSON_FILE_PATH = Diretorio.UsuarioJson.getCaminho();
@@ -263,7 +264,7 @@ public class Gestor extends Usuario {
         if (!validarEmailParaCadastro(email)) {
             return false;
         }
-        Estudante usuario = new Estudante(nome, email, turma.name());
+        Estudante usuario = new Estudante(nome, email, turma.name(), false);
 
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -311,7 +312,7 @@ public class Gestor extends Usuario {
         return true;
     }
 
-    public boolean editarUsuario(String email, String nome, String tipoAcesso, String turma) {
+    public boolean editarUsuario(String email, String nome, String tipoAcesso, String turma, Boolean cadastradoEmEletiva) {
         if (!validarTipoAcesso(tipoAcesso)) {
             return false;
         }
@@ -337,6 +338,7 @@ public class Gestor extends Usuario {
                     user.put("nome", nome);
                     user.put("tipoAcesso", tipoAcesso);
                     user.put("turma", turma);
+                    user.put("cadastradoEmEletiva", cadastradoEmEletiva);
                     break;
                 }
             }
@@ -375,12 +377,81 @@ public class Gestor extends Usuario {
         return false;
     }
 
-    public void alocarEstudanteAusente(Estudante estudante) {
-        // Implementação do método
+    public List<Estudante> listaEstudantesAusentes() {
+        try {
+            String content = new String(Files.readAllBytes(Paths.get(USUARIO_JSON_FILE_PATH)));
+            JSONArray jsonArray = new JSONArray(content);
+            List<Estudante> estudantes = new ArrayList<>();
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject usuario = jsonArray.getJSONObject(i);
+                if ("Estudante".equals(usuario.getString("tipoAcesso")) && usuario.getBoolean("cadastradoEmEletiva") == false) {
+                    Estudante estudante = new Estudante(
+                        usuario.getString("nome"),
+                        usuario.getString("email"),
+                        usuario.getString("turma"),
+                        usuario.optBoolean("cadastradoEmEletiva", false)
+                    );
+    
+                    estudantes.add(estudante);
+                }
+            }
+
+            List<Estudante> estudantesNaoCadastradosEmEletiva = estudantes.stream()
+                .collect(Collectors.toList());
+            estudantesNaoCadastradosEmEletiva.forEach(System.out::println);
+            return estudantesNaoCadastradosEmEletiva;
+
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    public void alocarEstudanteAusente(Estudante estudante, String tituloEletiva) {        
+        estudante.inscreverNaEletiva(tituloEletiva);
     }
 
     public void alocarTodosEstudantesAusentes() {
-        // Implementação do método
+        try{
+            List<Estudante> estudantesAusentes = this.listaEstudantesAusentes();
+            int indexEletiva = 0;
+
+            // Fazer um enquanto para ser executado enquanto length maior que 0;
+            // dentro for do estudantes
+            // Após isso Pegar JSON da eletiva
+
+            while(estudantesAusentes.size() > 0) {
+                String content = new String(Files.readAllBytes(Paths.get(ELETIVA_JSON_FILE_PATH)));
+    
+                JSONArray eletivaArray = new JSONArray(content);
+                JSONObject eletiva = eletivaArray.getJSONObject(indexEletiva);
+                for (int i = 0; i < estudantesAusentes.size(); i++) {
+                    System.out.println(estudantesAusentes);
+                    if (eletiva.getJSONArray("estudantesCadastrados").length() < 44) {
+                        estudantesAusentes.get(i).inscreverNaEletiva(eletiva.getString("titulo"));
+                        estudantesAusentes.remove(i);
+                        // Adicionar estudante 
+                    } else {
+                        indexEletiva++;
+                    }
+                }
+            }
+
+            System.out.println(estudantesAusentes);
+
+
+            // String content = new String(Files.readAllBytes(Paths.get(ELETIVA_JSON_FILE_PATH)));
+    
+            // JSONArray jsonArray = new JSONArray(content);
+            // for (int i = 0; i < jsonArray.length(); i++) {
+            //     JSONObject eletiva = jsonArray.getJSONObject(i);
+            //     if (eletiva.getBoolean("bloqueada")==true){
+            //         return;
+            //     }
+            // }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
     }
 
     public List<Usuario> listaEstudantesCadastrados() {
@@ -401,11 +472,6 @@ public class Gestor extends Usuario {
         }
 
         return usuariosEstudantes;
-    }
-
-    public List<Estudante> listaEstudantesAusentes() {
-        // Implementação do método
-        return null;
     }
 
     public List<Usuario> listaGestoresCadastrados() {
